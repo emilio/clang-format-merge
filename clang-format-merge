@@ -29,7 +29,5 @@ format "$BASE"
 format "$OURS"
 format "$OTHERS"
 
-git merge-file -p "$OURS" "$BASE" "$OTHERS" > "$OURS.tmp"
-RET=$?
-mv "$OURS.tmp" "$OURS"
-exit $RET
+git merge-file -Lcurrent -Lbase -Lothers "$OURS" "$BASE" "$OTHERS"
+exit $?
