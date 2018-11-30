@@ -12,8 +12,6 @@ REPO_PATH="$4"
 
 ROOT="$(git rev-parse --show-toplevel)"
 
-# -assume-filename only works with stdin, for whatever reason.
-
 echo "Merging $REPO_PATH in repo $ROOT"
 
 function format() {
@@ -21,6 +19,7 @@ function format() {
   if [ -f "$ROOT/mach" ]; then
     "$ROOT/mach" clang-format -a "$REPO_PATH" -p "$1" > "$1.tmp"
   else
+    # -assume-filename only works with stdin, for whatever reason.
     cat "$1" | clang-format -a "$REPO_PATH" > "$1.tmp"
   fi
   mv "$1.tmp" "$1"
