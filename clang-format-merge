@@ -22,7 +22,11 @@ function format() {
     # -assume-filename only works with stdin, for whatever reason.
     cat "$1" | clang-format "-assume-filename=$REPO_PATH" > "$1.tmp"
   fi
-  mv "$1.tmp" "$1"
+  if [ -s "$1.tmp" ]; then
+    mv "$1.tmp" "$1"
+  else
+    rm "$1.tmp"
+  fi
 }
 
 format "$BASE"
