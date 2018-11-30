@@ -1,0 +1,50 @@
+#!/bin/bash
+# This script just wraps git, setting up the 'clang-format-merge' handler. It
+# should act like git for most purposes.
+#
+# Use this like |path/to/git-wrapper.sh rebase mozcentral|.
+
+set -e
+function cleanup {
+    if [ -n R_CONFIGS_SET ]; then
+        echo "wrapper> Cleaning up configs" >&2
+        git config --unset merge.clang-format.name
+        git config --unset merge.clang-format.driver
+        git config --unset merge.clang-format.recursive
+    fi
+
+    if [ -n R_GITATTRIBUTES ]; then
+        echo "wrapper> Cleaning up .gitattributes" >&2
+        rm .gitattributes
+        if [ -f .gitattributes.bak ]; then
+            mv .gitattributes.bak .gitattributes
+        fi
+    fi
+}
+trap cleanup EXIT
+
+SOURCE="${BASH_SOURCE[0]}"
+MERGE_DRIVER="$(dirname $SOURCE)/clang-format-merge"
+
+# Updating git config to install merge driver
+echo "wrapper> Setting Configs" >&2
+git config merge.clang-format.name "clang-format driver"
+git config merge.clang-format.driver "$MERGE_DRIVER %O %A %B %P"
+git config merge.clang-format.recursive "binary"
+R_CONFIGS_SET=1
+
+# Write out gitattributes
+if [ -f .gitattributes ]; then
+    cp .gitattributes .gitattributes.bak
+fi
+
+echo "wrapper> Adding .gitattributes" >&2
+cat >> .gitattributes <<EOF
+*.cpp merge=clang-format
+*.h   merge=clang-format
+*.mm  merge=clang-format
+EOF
+R_GITATTRIBUTES=1
+
+git "$@"
+exit $?

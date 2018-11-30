@@ -3,7 +3,20 @@
 A very simple merge driver that allows you to automatically rebase and merge
 commits using clang-format.
 
-## Setup
+## Git Wrapper
+
+`git-wrapper` contains a wrapper script which will install this merge driver,
+and then uninstall it immediately after the command has completed. This
+wrapper can be used for running rebases.
+
+```shell
+$ /path/to/git-wrapper rebase central/branches/default/tip
+```
+
+Do note that if a merge conflict occurs, `git-wrapper rebase --continue`
+should be used rather than using `git` directly.
+
+## Manual Setup
 
 In `.git/config`:
 
