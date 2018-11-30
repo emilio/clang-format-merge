@@ -1,0 +1,36 @@
+#!/bin/bash
+
+if [ $# -ne 4 ]; then
+  echo "usage: clang-format-merge %O %A %B %P";
+  exit 1
+fi
+
+BASE="$1"
+OURS="$2"
+OTHERS="$3"
+REPO_PATH="$4"
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+# -assume-filename only works with stdin, for whatever reason.
+
+echo "Merging $REPO_PATH in repo $ROOT"
+
+function format() {
+  echo "Formatting $1 as $REPO_PATH"
+  if [ -f "$ROOT/mach" ]; then
+    "$ROOT/mach" clang-format -a "$REPO_PATH" -p "$1" > "$1.tmp"
+  else
+    cat "$1" | clang-format -a "$REPO_PATH" > "$1.tmp"
+  fi
+  mv "$1.tmp" "$1"
+}
+
+format "$BASE"
+format "$OURS"
+format "$OTHERS"
+
+git merge-file -p "$OURS" "$BASE" "$OTHERS" > "$OURS.tmp"
+RET=$?
+mv "$OURS.tmp" "$OURS"
+exit $RET
