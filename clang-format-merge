@@ -14,30 +14,7 @@ ROOT="$(git rev-parse --show-toplevel)"
 
 echo "Merging $REPO_PATH in repo $ROOT"
 
-function format() {
-  echo "Formatting $1 as $REPO_PATH"
-  if [ -f "$ROOT/mach" ]; then
-    "$ROOT/mach" clang-format -a "$REPO_PATH" -p "$1" > "$1.tmp"
-  else
-    # -assume-filename only works with stdin, for whatever reason.
-    cat "$1" | clang-format "-assume-filename=$REPO_PATH" > "$1.tmp"
-  fi
-  if [ $? -ne 0 ]; then
-    # We let the thing keep going, this will end up in `git merge-file` and
-    # that will error out if there are conflicts.
-    echo "clang-format failed, make sure you run ./mach clang-format manually at least once"
-    cat "$1.tmp"
-    rm "$1.tmp"
-  elif [ -s "$1.tmp" ]; then
-    mv "$1.tmp" "$1"
-  else
-    rm "$1.tmp"
-  fi
-}
-
-format "$BASE"
-format "$OURS"
-format "$OTHERS"
+clang-format "-assume-filename=$REPO_PATH" -i "$BASE" "$OURS" "$OTHERS"
 
 git merge-file -Lcurrent -Lbase -Lothers "$OURS" "$BASE" "$OTHERS"
 exit $?
