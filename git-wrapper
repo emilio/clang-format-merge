@@ -5,6 +5,9 @@
 # Use this like |path/to/git-wrapper.sh rebase mozcentral|.
 
 set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+
 function cleanup {
     if [ -n R_CONFIGS_SET ]; then
         echo "wrapper> Cleaning up configs" >&2
@@ -14,10 +17,10 @@ function cleanup {
     fi
 
     if [ -n R_GITATTRIBUTES ]; then
-        echo "wrapper> Cleaning up .gitattributes" >&2
-        rm .gitattributes
-        if [ -f .gitattributes.bak ]; then
-            mv .gitattributes.bak .gitattributes
+        echo "wrapper> Cleaning up $ROOT/.git/info/attributes" >&2
+        rm "$ROOT/.git/info/attributes"
+        if [ -f "$ROOT/.git/info/attributes".bak ]; then
+            mv "$ROOT/.git/info/attributes".bak "$ROOT/.git/info/attributes"
         fi
     fi
 }
@@ -34,12 +37,12 @@ git config merge.clang-format.recursive "binary"
 R_CONFIGS_SET=1
 
 # Write out gitattributes
-if [ -f .gitattributes ]; then
-    cp .gitattributes .gitattributes.bak
+if [ -f "$ROOT/.git/info/attributes" ]; then
+    cp "$ROOT/.git/info/attributes" "$ROOT/.git/info/attributes.bak"
 fi
 
-echo "wrapper> Adding .gitattributes" >&2
-cat >> .gitattributes <<EOF
+echo "wrapper> Adding $ROOT/.git/info/attributes" >&2
+cat >> "$ROOT/.git/info/attributes" <<EOF
 *.cpp merge=clang-format
 *.h   merge=clang-format
 *.mm  merge=clang-format
