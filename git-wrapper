@@ -9,14 +9,14 @@ set -e
 ROOT="$(git rev-parse --show-toplevel)"
 
 function cleanup {
-    if [ -n R_CONFIGS_SET ]; then
+    if [ -n "$R_CONFIGS_SET" ]; then
         echo "wrapper> Cleaning up configs" >&2
         git config --unset merge.clang-format.name
         git config --unset merge.clang-format.driver
         git config --unset merge.clang-format.recursive
     fi
 
-    if [ -n R_GITATTRIBUTES ]; then
+    if [ -n "$R_GITATTRIBUTES" ]; then
         echo "wrapper> Cleaning up $ROOT/.git/info/attributes" >&2
         rm "$ROOT/.git/info/attributes"
         if [ -f "$ROOT/.git/info/attributes".bak ]; then
@@ -27,7 +27,7 @@ function cleanup {
 trap cleanup EXIT
 
 SOURCE="${BASH_SOURCE[0]}"
-MERGE_DRIVER="$(dirname $SOURCE)/clang-format-merge"
+MERGE_DRIVER="$(dirname "$SOURCE")/clang-format-merge"
 
 # Updating git config to install merge driver
 echo "wrapper> Setting Configs" >&2
